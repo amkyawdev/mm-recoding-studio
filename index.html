@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>မြန်မာ အသံဖမ်းစတူဒီယို</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Noto Sans Myanmar', 'Myanmar Text', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        main {
+            padding: 30px;
+        }
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .progress {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .prompt-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+        .prompt-group {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        .prompt-text {
+            font-size: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .recorder {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .record-btn, .stop-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .record-btn {
+            background: #e74c3c;
+            color: white;
+        }
+        .record-btn:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+        .record-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        .stop-btn {
+            background: #34495e;
+            color: white;
+        }
+        .stop-btn:hover {
+            background: #2c3e50;
+        }
+        .stop-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        .audio-preview {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .audio-preview audio {
+            width: 100%;
+        }
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .submit-btn:hover {
+            transform: scale(1.02);
+        }
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        .download-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+        }
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .status.recording {
+            background: #fee;
+            color: #c00;
+        }
+        .status.saved {
+            background: #efe;
+            color: #060;
+        }
+        .status.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎙️ မြန်မာ အသံဖမ်းစတူဒီယို</h1>
+            <p>မြန်မာစာအသံဒေတာ ဖန်းတီးရန်</p>
+        </header>
+        <main>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <p class="progress-text" id="progressText">0 / 0 (0%)</p>
+
+            <div class="status hidden" id="status"></div>
+
+            <div class="prompt-box">
+                <span class="prompt-group" id="promptGroup">Loading...</span>
+                <p class="prompt-text" id="promptText">စောင့်ပါတယ်...</p>
+            </div>
+
+            <div class="recorder">
+                <button class="record-btn" id="recordBtn">
+                    <span>🎤</span>
+                    <span>အသံဖမ်းရန် နှိပ်ပါ။</span>
+                </button>
+                <button class="stop-btn" id="stopBtn" disabled>
+                    <span>⏹️</span>
+                    <span>ရပါ။</span>
+                </button>
+            </div>
+
+            <div class="audio-preview" id="audioPreview" style="display: none;">
+                <audio id="audioPlayer" controls></audio>
+            </div>
+
+            <button class="submit-btn" id="submitBtn" disabled>
+                သိမ်းပါ။
+            </button>
+
+            <a href="#" class="download-link" id="downloadLink" style="display: none;">
+                📥 သိမ်းထားသော အသံများ ဒေါင်းလုပ်လုပ်ပါ။
+            </a>
+        </main>
+    </div>
+
+    <script>
+        // Prompts data
+        const prompts = [
+            { id: "4000000001", group: "CustomerService", text: "မင်္ဂလာပါ။ ကျွန်တော်မှာဘာကူညီပါတယ်။" },
+            { id: "4000000002", group: "CustomerService", text: "နေ့စဉ်အတွက် အမှားများကို ပြင်ပါ။" },
+            { id: "4000000003", group: "CustomerService", text: "ဒီပြဿနာကို ဘယ်လိုဖြေရှင်းမလဲ။" },
+            { id: "4000000004", group: "CustomerService", text: "စျေးနှုန်းအချက်အလက်များ သိလိုပါတယ်။" },
+            { id: "4000000005", group: "CustomerService", text: "အချိန်အပါ် ကူညီပါတယ်။" },
+            { id: "4000000006", group: "CustomerService", text: "နမူနာပါးသောက်ပါ။" },
+            { id: "4000000007", group: "CustomerService", text: "အမှာစာ ပါးစုပါ။" },
+            { id: "4000000008", group: "CustomerService", text: "ပစ္စည်းပါးသောက်ပါ။" },
+            { id: "4000000009", group: "CustomerService", text: "ငွေပေးချေပါ။" },
+            { id: "4000000010", group: "CustomerService", text: "နောက်လာမယ်မှတ်ပါ။" },
+            { id: "3000000001", group: "Chat", text: "မင်္ဂလာပါ။" },
+            { id: "3000000002", group: "Chat", text: "နေကောင်းပါတယ်။" },
+            { id: "3000000003", group: "Chat", text: "ဘာလုပ်နေလဲ။" },
+            { id: "3000000004", group: "Chat", text: "အလုပ်အားလုံးပါတယ်။" },
+            { id: "3000000005", group: "Chat", text: "အပါးရပါတယ်။" },
+            { id: "3000000006", group: "Chat", text: "တော်ပါတယ်။" },
+            { id: "3000000007", group: "Chat", text: "ကိုယ်ပါးသောက်ပါ။" },
+            { id: "3000000008", group: "Chat", text: "မှတ်ပါ။" },
+            { id: "3000000009", group: "Chat", text: "တော်ပါတယ်။" },
+            { id: "3000000010", group: "Chat", text: "ဆက်လုပ်ပါ။" },
+            { id: "0000000001", group: "General", text: "မင်္ဂလာပါ။" },
+            { id: "0000000002", group: "General", text: "နေကောင်းပါတယ်။" },
+            { id: "0000000003", group: "General", text: "ကျေးဇူးပါတယ်။" },
+            { id: "0000000004", group: "General", text: "ဝမ်းသာပါတယ်။" },
+            { id: "0000000005", group: "General", text: "တောင်းပါတယ်။" },
+            { id: "0000000006", group: "General", text: "နားလည်ပါတယ်။" },
+            { id: "0000000007", group: "General", text: "အဆင်ပါတယ်။" },
+            { id: "0000000008", group: "General", text: "မှားပါတယ်။" },
+            { id: "0000000009", group: "General", text: "မသိပါတယ်။" },
+            { id: "0000000010", group: "General", text: "ပါးစုပါ။" },
+            { id: "0000000011", group: "General", text: "ပါးသောက်ပါ။" },
+            { id: "0000000012", group: "General", text: "ဆက်ပါ။" },
+            { id: "0000000013", group: "General", text: "ရပါတယ်။" },
+            { id: "0000000014", group: "General", text: "မရှိပါတယ်။" },
+            { id: "0000000015", group: "General", text: "ရှိပါတယ်။" },
+            { id: "0000000016", group: "General", text: "သွားပါ။" },
+            { id: "0000000017", group: "General", text: "လာပါ။" },
+            { id: "0000000018", group: "General", text: "ကြည့်ပါ။" },
+            { id: "0000000019", group: "General", text: "ကြိုက်ပါတယ်။" },
+            { id: "0000000020", group: "General", text: "မကြိုက်ပါတယ်။" }
+        ];
+
+        // State
+        let currentIndex = 0;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let currentAudioBlob = null;
+        let recordedAudios = JSON.parse(localStorage.getItem('recordedAudios') || '{}');
+
+        // DOM elements
+        const recordBtn = document.getElementById('recordBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const audioPreview = document.getElementById('audioPreview');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const progress = document.getElementById('progress');
+        const progressText = document.getElementById('progressText');
+        const promptGroup = document.getElementById('promptGroup');
+        const promptText = document.getElementById('promptText');
+        const status = document.getElementById('status');
+        const downloadLink = document.getElementById('downloadLink');
+
+        // Initialize
+        function init() {
+            updateUI();
+            updateDownloadLink();
+        }
+
+        // Update UI
+        function updateUI() {
+            const total = prompts.length;
+            const completed = Object.keys(recordedAudios).length;
+            const percent = total > 0 ? (completed / total) * 100 : 0;
+
+            progress.style.width = percent + '%';
+            progressText.textContent = `${completed} / ${total} (${Math.round(percent)}%)`;
+
+            // Find next incomplete prompt
+            let nextPrompt = null;
+            for (let i = 0; i < prompts.length; i++) {
+                if (!recordedAudios[prompts[i].id]) {
+                    currentIndex = i;
+                    nextPrompt = prompts[i];
+                    break;
+                }
+            }
+
+            if (nextPrompt) {
+                promptGroup.textContent = nextPrompt.group;
+                promptText.textContent = nextPrompt.text;
+            } else {
+                promptGroup.textContent = "ပါးစုပါပါတယ်";
+                promptText.textContent = "အသံဖမ်းပါးစုပါပါတယ်။";
+                recordBtn.disabled = true;
+            }
+
+            updateDownloadLink();
+        }
+
+        // Update download link
+        function updateDownloadLink() {
+            const count = Object.keys(recordedAudios).length;
+            if (count > 0) {
+                downloadLink.style.display = 'block';
+            } else {
+                downloadLink.style.display = 'none';
+            }
+        }
+
+        // Start recording
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    audioChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    currentAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(currentAudioBlob);
+                    audioPlayer.src = audioUrl;
+                    audioPreview.style.display = 'block';
+                    submitBtn.disabled = false;
+
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                recordBtn.disabled = true;
+                stopBtn.disabled = false;
+                status.textContent = "🔴 အသံဖမ်းနေပါ။";
+                status.className = "status recording";
+            } catch (err) {
+                alert("အသံဖမ်းလုပ်မရပါတယ်။ မိုက်ဖုန်း ပါးစုပါ။");
+                console.error(err);
+            }
+        }
+
+        // Stop recording
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                recordBtn.disabled = false;
+                stopBtn.disabled = true;
+                status.textContent = "✅ အသံဖမ်းပြီးပါတယ်။";
+                status.className = "status saved";
+            }
+        }
+
+        // Submit recording
+        function submitRecording() {
+            if (currentAudioBlob) {
+                const prompt = prompts[currentIndex];
+                const reader = new FileReader();
+                reader.onload = () => {
+                    recordedAudios[prompt.id] = {
+                        audio: reader.result,
+                        text: prompt.text,
+                        group: prompt.group
+                    };
+                    localStorage.setItem('recordedAudios', JSON.stringify(recordedAudios));
+                    currentAudioBlob = null;
+                    audioPreview.style.display = 'none';
+                    submitBtn.disabled = true;
+                    status.className = "status hidden";
+                    updateUI();
+                    alert("သိမ်းပါပါတယ်။");
+                };
+                reader.readAsDataURL(currentAudioBlob);
+            }
+        }
+
+        // Download all recordings
+        function downloadAll() {
+            const data = JSON.stringify(recordedAudios, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'myanmar-audio-recordings.json';
+            a.click();
+        }
+
+        // Event listeners
+        recordBtn.addEventListener('click', startRecording);
+        stopBtn.addEventListener('click', stopRecording);
+        submitBtn.addEventListener('click', submitRecording);
+        downloadLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            downloadAll();
+        });
+
+        // Start
+        init();
+    </script>
+</body>
+</html>
