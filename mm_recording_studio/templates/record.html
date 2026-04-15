@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>အသံဖမ်းဆော့ဝ်ဝမ်း - မြန်မာ အသံဖမ်းစတူဒီယို</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="/" class="back-link">← ပြန်သွားပါ။</a>
+            <h1>🎙️ အသံဖမ်းဆော့ဝ်ဝမ်း</h1>
+        </header>
+        
+        <main>
+            <div class="progress-bar">
+                <div class="progress" style="width: {{ complete_percent }}%"></div>
+            </div>
+            <p class="progress-text">{{ num_complete }} / {{ num_items }} ပါးစုပါတယ်။ ({{ "%.0f"|format(complete_percent) }}%)</p>
+            
+            <div class="prompt-box">
+                <span class="prompt-group">{{ prompt_group }}</span>
+                <p class="prompt-text" id="promptText">{{ text }}</p>
+            </div>
+            
+            <div class="recorder">
+                <button id="recordBtn" class="record-btn">
+                    <span class="icon">🎤</span>
+                    <span class="label">အသံဖမ်းရန် နှိပ်ပါ။</span>
+                </button>
+                <button id="stopBtn" class="stop-btn" disabled>
+                    <span class="icon">⏹️</span>
+                    <span class="label">ရပ်ပါ။</span>
+                </button>
+            </div>
+            
+            <div class="audio-preview" id="audioPreview" style="display: none;">
+                <audio id="audioPlayer" controls></audio>
+                <div class="audio-controls">
+                    <button id="submitBtn" class="submit-btn">
+                        <span class="icon">✅</span>
+                        <span class="label">ပါးစုပါ။</span>
+                    </button>
+                    <button id="retryBtn" class="retry-btn">
+                        <span class="icon">🔄</span>
+                        <span class="label">ပြန်လုပ်ပါ။</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="errorMessage" class="error" style="display: none;"></div>
+        </main>
+    </div>
+    
+    <form id="submitForm" method="post" action="/submit" style="display: none;">
+        <input type="hidden" name="language" value="{{ language }}">
+        <input type="hidden" name="promptGroup" value="{{ prompt_group }}">
+        <input type="hidden" name="promptId" value="{{ prompt_id }}">
+        <input type="hidden" name="text" value="{{ text }}">
+        <input type="hidden" name="format" value="webm">
+        <input type="file" name="audio" id="audioFile" accept="audio/*">
+    </form>
+    
+    <script>
+        const language = "{{ language }}";
+        const promptGroup = "{{ prompt_group }}";
+        const promptId = "{{ prompt_id }}";
+        const text = "{{ text }}";
+    </script>
+    <script src="/js/record.js"></script>
+</body>
+</html>

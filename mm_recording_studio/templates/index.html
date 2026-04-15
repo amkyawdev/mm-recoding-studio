@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>မြန်မာ အသံဖမ်းစတူဒီယို</title>
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎙️</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎙️ မြန်မာ အသံဖမ်းစတူဒီယို</h1>
+            <p>မြန်မာစာအသံဖမ်းဆော့ဝ်ဝမ်း အတွက် ပါ။</p>
+        </header>
+        
+        {% if cc0 %}
+        <div class="cc0-notice">
+            <p>ဤမှတ်တမ်းများသည် အများသုံးဒိုမိန်းလိုင်း၊ Creative Commons CC0 အောက်တွင်းမှာ ထုတ်ပါတယ်။</p>
+        </div>
+        {% endif %}
+        
+        <main>
+            {% if multi_user %}
+            <div class="login-form">
+                <label for="userId">အသုံးပါသူ ကုဒ်:</label>
+                <input type="text" id="userId" name="userId" required>
+            </div>
+            {% endif %}
+            
+            <div class="language-selection">
+                <h2>ဘာသာစကား ရွေးပါ။</h2>
+                <div class="languages">
+                    {% for name, code in languages %}
+                    <a href="/record?language={{ code }}{% if multi_user %}&userId={{ userId }}{% endif %}" class="language-btn">
+                        {{ name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h3>ဘယ်လိုအသံဖမ်းမလဲ။</h3>
+                <ol>
+                    <li>ဘာသာစကားရွေးပါ။</li>
+                    <li>စာလုံးများကို ဖတ်ပါ။</li>
+                    <li>အသံဖမ်းပါ။</li>
+                    <li>ပါးစုပြီးဆုံးပါတယ်။</li>
+                </ol>
+            </div>
+        </main>
+        
+        <footer>
+            <p>ဤအပလီကေးရှင်းသည် မြန်မာစာ အသံဒေတာအတွက် ဖန်းတီးထားပါတယ်။</p>
+        </footer>
+    </div>
+    
+    <script src="/js/app.js"></script>
+</body>
+</html>
