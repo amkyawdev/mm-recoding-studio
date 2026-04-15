@@ -1,6 +1,25 @@
-# Myanmar Recording Studio
+# 🎙️ Myanmar Recording Studio
 
 Local tool for recording yourself to train a Myanmar text to speech voice.
+
+## Live Demo
+
+🌐 **Try it now:** https://mm-recoding-studio.vercel.app
+
+---
+
+## Screenshots
+
+### Main Page
+![Main Page](screenshots/main.png)
+
+### Recording Interface
+![Recording](screenshots/recording.png)
+
+### Progress Tracking
+![Progress](screenshots/progress.png)
+
+---
 
 ## အသုံးပါနည်းလမ်းများ
 

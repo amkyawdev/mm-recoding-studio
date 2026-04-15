@@ -337,6 +337,41 @@
             color: var(--text-light);
         }
 
+        .format-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .format-selector label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .format-selector select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-family: inherit;
+            background: var(--card-bg);
+            color: var(--text);
+        }
+
+        .waveform-container {
+            height: 60px;
+            background: var(--bg);
+            border-radius: 8px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+
+        .waveform-container canvas {
+            width: 100%;
+            height: 100%;
+        }
+
         @media (max-width: 480px) {
             body { padding: 12px; }
             .card { padding: 16px; }
@@ -384,6 +419,14 @@
             </div>
 
             <div class="recorder">
+                <div class="format-selector">
+                    <label>📁 ဖိုင်းပါးသောက်ပါ။</label>
+                    <select id="formatSelect">
+                        <option value="webm">WebM (အလွယ်ဆုံး)</option>
+                        <option value="wav">WAV (အောင်းဆုံး)</option>
+                        <option value="mp3">MP3 (အသေးလုံးဆုံး)</option>
+                    </select>
+                </div>
                 <button class="btn btn-record" id="recordBtn">
                     <span>🎤</span>
                     <span>အသံဖမ်းရန် နှိပ်ပါ။</span>
@@ -392,6 +435,10 @@
                     <span>⏹️</span>
                     <span>ရပါ။</span>
                 </button>
+            </div>
+
+            <div class="waveform-container" id="waveformContainer">
+                <canvas id="waveform"></canvas>
             </div>
 
             <div class="timer" id="timer">00:00</div>
@@ -441,12 +488,16 @@
         let timerInterval = null;
         let recordingSeconds = 0;
         let totalPrompts = 0;
+        let audioContext = null;
+        let analyser = null;
+        let animationId = null;
 
         // Load recorded prompts from localStorage
         let recordedPrompts = JSON.parse(localStorage.getItem('mm_recorded_prompts') || '{}');
 
         // Current prompt data
         let currentPrompt = null;
+        let selectedFormat = 'webm';
 
         // DOM Elements
         const totalComplete = document.getElementById('totalComplete');
@@ -457,8 +508,10 @@
         const promptGroup = document.getElementById('promptGroup');
         const promptNumber = document.getElementById('promptNumber');
         const promptText = document.getElementById('promptText');
+        const formatSelect = document.getElementById('formatSelect');
         const recordBtn = document.getElementById('recordBtn');
         const stopBtn = document.getElementById('stopBtn');
+        const waveformCanvas = document.getElementById('waveform');
         const timer = document.getElementById('timer');
         const status = document.getElementById('status');
         const error = document.getElementById('error');
@@ -560,8 +613,26 @@
                     } 
                 });
 
+                // Set up audio context for waveform
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                const source = audioContext.createMediaStreamSource(stream);
+                source.connect(analyser);
+                analyser.fftSize = 2048;
+
+                // Start waveform visualization
+                drawWaveform();
+
+                // Determine mime type based on selected format
+                let mimeType = 'audio/webm;codecs=opus';
+                if (selectedFormat === 'wav') {
+                    mimeType = 'audio/wav';
+                } else if (selectedFormat === 'mp3') {
+                    mimeType = 'audio/mp3';
+                }
+
                 mediaRecorder = new MediaRecorder(stream, {
-                    mimeType: 'audio/webm;codecs=opus'
+                    mimeType: mimeType
                 });
                 audioChunks = [];
 
@@ -617,6 +688,12 @@
                 stopBtn.disabled = true;
                 status.textContent = '✅ အသံဖမ်းပြီးပါတယ်။';
                 status.className = 'status show saved';
+
+                // Stop waveform
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
             }
         }
 
@@ -807,13 +884,59 @@
         totalPrompts = embeddedPrompts.length;
 
         // Event Listeners
+        formatSelect.addEventListener('change', (e) => {
+            selectedFormat = e.target.value;
+        });
+
         recordBtn.addEventListener('click', startRecording);
         stopBtn.addEventListener('click', stopRecording);
         saveBtn.addEventListener('click', saveRecording);
         discardBtn.addEventListener('click', discardRecording);
         downloadBtn.addEventListener('click', downloadRecordings);
 
-        // Start
+        // Waveform visualization
+        function drawWaveform() {
+            if (!analyser) return;
+
+            const canvas = waveformCanvas;
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width = canvas.offsetWidth;
+            const height = canvas.height = canvas.offsetHeight;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            analyser.getByteTimeDomainData(dataArray);
+
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#6366f1';
+            ctx.beginPath();
+
+            const sliceWidth = width / bufferLength;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const v = dataArray[i] / 128.0;
+                const y = (v * height) / 2;
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+
+                x += sliceWidth;
+            }
+
+            ctx.lineTo(width, height / 2);
+            ctx.stroke();
+
+            animationId = requestAnimationFrame(drawWaveform);
+        }
+
+        // Start recording
         init();
     </script>
 </body>
