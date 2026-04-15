@@ -55,7 +55,7 @@ Now a "login code" will be required to record. A directory `output/user_<code>/<
 
 ဤအပလီကေးရှင်းသည် မြန်မာစာ အသံဒေတာ ဖန်းတီးရန် အတွက် ဖန်းတီးထားပါတယ်။
 
-ပါးစုမှတ်တမ်းများသည် Piper TTS အတွက် သုံးပါတယ်။
+ပါးစုမှတ်တမ်းများသည် Amkyawdev TTS အတွက် သုံးပါတယ်။
 
 ## License
 
